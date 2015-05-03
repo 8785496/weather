@@ -2,7 +2,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-var parseDate = d3.time.format("%d-%b-%y").parse;
+var parseDate = d3.time.format("%d-%m-%y %H:%M:%S").parse;
 
 var x = d3.time.scale()
         .range([0, width]);
@@ -32,7 +32,7 @@ var svg = d3.select("body").append("svg")
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.json("index.php?city", function(error, data){
+d3.json("index.php?history", function(error, data){
     console.log(data);
     
     data.forEach(function (d) {
@@ -60,7 +60,7 @@ d3.json("index.php?city", function(error, data){
             .attr("y", 6)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
-            .text("Температура (C)");
+            .text("Температура, °C");
 
     svg.append("path")
             .datum(data)
