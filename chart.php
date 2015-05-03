@@ -10,6 +10,7 @@
         <script src="/exts/jquery-2.1.3.js"></script>
         <script src="/exts/d3.js"></script>
         <script src="/view/js/weather.js"></script>
+        <script src="/view/js/chart.js"></script>
         <link rel="stylesheet" type="text/css" href="/view/css/style.css">
         <link rel="stylesheet" type="text/css" href="/view/css/chart.css">
     </head>
@@ -18,6 +19,9 @@
             <button id="getweather" onclick="">Получить погоду</button>
             <div id="weather"></div>
         </div>
-        <script src="/view/js/chart.js"></script>
+        <div id="nsk"></div>
+        <script>
+            chart('nsk');
+        </script>
     </body>
 </html>
