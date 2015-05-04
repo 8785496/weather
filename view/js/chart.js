@@ -12,7 +12,7 @@ function chart(sity) {
                 return x(d.date);
             })
             .y(function (d) {
-                return y(d.close);
+                return y(d.temp);
             });
     var svg = d3.select("#" + sity).append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -21,18 +21,18 @@ function chart(sity) {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     d3.json("index.php?history=" + sity, function (error, data) {
-        console.log(data);
+        //console.log(data);
 
         data.forEach(function (d) {
             d.date = parseDate(d.date);
-            d.close = +d.close;
+            d.temp = +d.temp;
         });
 
         x.domain(d3.extent(data, function (d) {
             return d.date;
         }));
         y.domain(d3.extent(data, function (d) {
-            return d.close;
+            return d.temp;
         }));
 
         svg.append("g")

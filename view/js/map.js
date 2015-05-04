@@ -1,30 +1,31 @@
 ymaps.ready(init);
 
 function init() {
+    $.ajax({
+        method: "GET",
+        url: "/index.php?cities",
+        contentType: "application/json"
+    }).done(function (response) {
+        initMap(response);
+    });
+}
+
+function initMap(cities) {
     var myMap = new ymaps.Map("map", {
         center: [55.39440246, 86.08778600],
         zoom: 5
     });
-    // массив городов
-    var cities = [
-        {city: 'kemerovo', coord: [55.39440246, 86.08778600]},
-        {city: 'nsk', coord: [55.00081759, 82.95627700]},
-        {city: 'krsk', coord: [56.02278829, 92.89742450]},
-        {city: 'omsk', coord: [55.12276857, 73.37843000]},
-        {city: 'tomsk', coord: [56.50682347, 84.97990300]},
-        {city: 'barnaul', coord: [53.31831663, 83.68515200]}
-    ];
     var placemarks = [];
     cities.forEach(function (item) {
-        console.log(item);
+        //console.log(item);
         placemarks.push(new ymaps.Placemark(item.coord, {
+            iconContent: item.temp + ' °C',
             hintContent: "Нажмите, чтобы узнать погоду",
             city: item.city
         }, {
             // Запретим замену обычного балуна на балун-панель.
             balloonPanelMaxMapArea: 0,
-            preset: 'islands#dotIcon',
-            iconColor: '#3b5998',
+            preset: "islands#blueStretchyIcon",
             // Заставляем балун открываться даже если в нем нет содержимого.
             openEmptyBalloon: true
         }));
@@ -44,7 +45,8 @@ function init() {
                 contentType: "application/json",
                 data: {weather: city}
             }).done(function (response) {
-                console.log(response);
+                //console.log(response);
+                target.properties.set('iconContent', response.result.temp_current_c + ' °C');
                 var result = '<div><div class="weather">Температура: <b>' + response.result.temp_current_c + ' °C</b><br>';
                 result += response.result.cloud_title + ', ' + response.result.precip_title + '<br>';
                 result += 'Ветер: ' + response.result.wind_avg + ' м/с, ' + response.result.wind_ru_full + '<br>';
