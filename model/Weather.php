@@ -5,9 +5,9 @@ class Weather {
     public $city;
     public $temp;
     public $date;
-    private static $server = 'http://pogoda.ngs.ru/json/';
-    private static $cities = ['nsk', 'kemerovo', 'krsk', 'omsk', 'tomsk', 'barnaul'];
-    private static $coord = [
+    protected static $server = 'http://pogoda.ngs.ru/json/';
+    protected static $cities = ['nsk', 'kemerovo', 'krsk', 'omsk', 'tomsk', 'barnaul'];
+    protected static $coord = [
         'kemerovo' => [55.39440246, 86.08778600],
         'nsk' => [55.00081759, 82.95627700],
         'krsk' => [56.02278829, 92.89742450], // Красноярск
@@ -15,7 +15,8 @@ class Weather {
         'tomsk' => [56.50682347, 84.97990300],
         'barnaul' => [53.31831663, 83.68515200]
     ];
-
+    
+    // данные с сервера НГС
     public static function getWeather($city) {
         $request = [
             'method' => 'getForecast',
@@ -36,44 +37,61 @@ class Weather {
         return json_decode($result, true);
     }
 
-    public static function getCurrentTemp($city) {
-        $data = self::getWeather($city);
-        $result['last_success_update_date'] = $data['result']['last_success_update_date'];
-        $result['temp_current_c'] = $data['result']['temp_current_c'];
-        return $result;
-    }
-
+//    public static function getCurrentTemp($city) {
+//        $data = self::getWeather($city);
+//        $result['last_success_update_date'] = $data['result']['last_success_update_date'];
+//        $result['temp_current_c'] = $data['result']['temp_current_c'];
+//        return $result;
+//    }
+   
+    // данные из БД
     public static function getHistoryTemp($city, $limit = 48) {
-        $m = new MongoClient();
-        $db = $m->weather;
-        $collection = $db->temp;
-        $cursor = $collection->find(["city" => $city])->sort(["date" => -1])->limit($limit);
         $result = [];
-        foreach ($cursor as $document) {
-            $result[] = [
-                "temp" => $document["temp"],
-                "date" => date('d-m-y H:i:s', $document["date"])
-            ];
+        try {
+            $m = new MongoClient();
+            $db = $m->weather;
+            $collection = $db->temp;
+            $cursor = $collection->find(["city" => $city])->sort(["date" => -1])->limit($limit);
+            foreach ($cursor as $document) {
+                $result[] = [
+                    "temp" => $document["temp"],
+                    "date" => date('d-m-y H:i:s', $document["date"])
+                ];
+            }
+        } catch (Exception $ex) {
+            $result = null;
         }
         return $result;
     }
     
-    public static function getCities(){
-        $m = new MongoClient();
-        $db = $m->weather;
-        $collection = $db->temp;
+    // массив городов, координат и последнее значение температуры из БД
+    public static function getCities() {
         $result = [];
-        foreach (self::$cities as $city) {
-            $cursor = $collection->find(["city" => $city])->sort(["date" => -1])->limit(1);
-            $result[] = [
-                'city' => $city,
-                'coord' => self::$coord[$city],
-                'temp' => str_replace('.', ',', $cursor->next()['temp'])
-            ];
+        try {
+            $m = new MongoClient();
+            $db = $m->weather;
+            $collection = $db->temp;
+            foreach (self::$cities as $city) {
+                $cursor = $collection->find(["city" => $city])->sort(["date" => -1])->limit(1);
+                $result[] = [
+                    'city' => $city,
+                    'coord' => self::$coord[$city],
+                    'temp' => str_replace('.', ',', $cursor->next()['temp'])
+                ];
+            }
+        } catch (Exception $ex) {
+            foreach (self::$cities as $city) {
+                $result[] = [
+                    'city' => $city,
+                    'coord' => self::$coord[$city],
+                    'temp' => ''
+                ];
+            }
         }
         return $result;
     }
 
+    // сохранение в БД
     public function save() {
         $m = new MongoClient();
         $db = $m->weather;
@@ -85,8 +103,9 @@ class Weather {
         ];
         $collection->insert($document);
     }
-    
-    public static function getCitiesName(){
+
+    public static function getCitiesName() {
         return self::$cities;
     }
+
 }

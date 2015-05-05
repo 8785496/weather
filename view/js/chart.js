@@ -21,7 +21,9 @@ function chart(sity) {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     d3.json("index.php?history=" + sity, function (error, data) {
-        //console.log(data);
+        if(!data){
+            return false;
+        }
 
         data.forEach(function (d) {
             d.date = parseDate(d.date);
