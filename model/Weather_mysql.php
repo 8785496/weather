@@ -9,13 +9,14 @@ class Weather_mysql extends Weather {
 
     // данные из БД
     public static function getHistoryTemp($city, $limit = 48) {
-        $result = [];
         try {
+            $result = [];
             $dbh = new PDO('mysql:host=' . self::$host . ';dbname=' . self::$dbname, self::$username, self::$password);
             $stmt = $dbh->prepare('SELECT * FROM temp WHERE city=:city ORDER BY `date` DESC LIMIT :limit');
             $stmt->bindParam(':city', $city, PDO::PARAM_STR);
             $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
+            date_default_timezone_set('Asia/Novosibirsk');
             while ($row = $stmt->fetch()) {
                 $result[] = [
                     "temp" => $row["temp"],
@@ -30,8 +31,8 @@ class Weather_mysql extends Weather {
 
     // массив городов, координат и последнее значение температуры из БД
     public static function getCities() {
-        $result = [];
         try {
+            $result = [];
             $dbh = new PDO('mysql:host=' . self::$host . ';dbname=' . self::$dbname, self::$username, self::$password);
             $stmt = $dbh->prepare('SELECT * FROM temp WHERE city=:city ORDER BY `date` DESC LIMIT 1');
             foreach (self::$cities as $city) {
@@ -43,18 +44,8 @@ class Weather_mysql extends Weather {
                     'temp' => str_replace('.', ',', $stmt->fetch()['temp'])
                 ];                
             }
-//            $m = new MongoClient();
-//            $db = $m->weather;
-//            $collection = $db->temp;
-//            foreach (self::$cities as $city) {
-//                $cursor = $collection->find(["city" => $city])->sort(["date" => -1])->limit(1);
-//                $result[] = [
-//                    'city' => $city,
-//                    'coord' => self::$coord[$city],
-//                    'temp' => str_replace('.', ',', $cursor->next()['temp'])
-//                ];
-//            }
         } catch (Exception $ex) {
+            $result = [];
             foreach (self::$cities as $city) {
                 $result[] = [
                     'city' => $city,

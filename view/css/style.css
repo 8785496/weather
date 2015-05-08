@@ -9,14 +9,9 @@ body, html {
     height: 100%;
 }
 .chart{
-    //float: left;
     height: 200px;
     width: 400px;
 }
-.wheather{
-    //float: left;
-}
-
 .chart {
     font: 10px sans-serif;
 }
@@ -26,11 +21,6 @@ body, html {
     stroke: #000;
     shape-rendering: crispEdges;
 }
-
-.x.axis path {
-    display: none;
-}
-
 .line {
     fill: none;
     stroke: steelblue;
